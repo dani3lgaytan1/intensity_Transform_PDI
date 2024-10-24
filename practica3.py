@@ -3,16 +3,6 @@ import cv2
 import matplotlib.pyplot as plt
 import  numpy as np
 
-original = cv2.imread('resaltar.png', cv2.IMREAD_GRAYSCALE)
-
-
-aux_Original = np.array(original)
-
-
-def imadjust(F,range_in=(0,1),range_out=(0,1),gamma=1):
-    G = (((F - range_in[0]) / (range_in[1] - range_in[0])) ** gamma) * (range_out[1] - range_out[0]) + range_out[0]
-    return G
-
 
 def negative_transform(img):
      
@@ -48,9 +38,9 @@ def gamma_transform(img, c=1, gamma=1):
 def estiramiento_contraste(img):
     
         img = img.astype(np.float32) # Convertir la imagen a flotante
-        minimo = np.amin(img) # Encontrar el valor mínimo de la imagen 
-        maximo = np.amax(img) # Encontrar el valor máximo de la imagen 
-        contraste_estirado = 255 * (img - minimo) / (maximo - minimo) # Aplicar la transformación de estiramiento de contraste
+        minimo = np.min(img) # Encontrar el valor mínimo de la imagen 
+        maximo = np.max(img) # Encontrar el valor máximo de la imagen 
+        contraste_estirado = 255 * ((img - minimo) / (maximo - minimo)) # Aplicar la transformación de estiramiento de contraste
         contraste_estirado = np.uint8(contraste_estirado) # Convertir la imagen a entero
         
         return contraste_estirado
@@ -58,19 +48,7 @@ def estiramiento_contraste(img):
 
 
 def intensity_slicing(image, r_min, r_max, highlight_value=255, preserve_outside=True):
-    """
-    Realiza una rebanada de nivel de intensidad sobre la imagen.
-    
-    Args:
-        image (numpy array): La imagen de entrada (en escala de grises).
-        r_min (int): Límite inferior del rango de intensidad.
-        r_max (int): Límite superior del rango de intensidad.
-        highlight_value (int): Valor de resaltado para los píxeles dentro del rango.
-        preserve_outside (bool): Si es True, preserva los valores fuera del rango; si es False, los establece a 0.
-    
-    Returns:
-        numpy array: La imagen con rebanada de nivel de intensidad aplicada.
-    """
+
     # Crear una copia de la imagen para trabajar
     output_image = np.zeros_like(image)
     
@@ -97,96 +75,119 @@ def bit_plane_slicing(image, num_bits=8):
         bit_planes[i] = bit_planes[i] * 255  # Escalar los valores para visualización
     return bit_planes
 
-#negativo = imadjust(aux_Original, (0, 1), (1, 0)) # Negativo de la imagen
-
-#print(negativo)
 
 
-
-#loga = log_transform(aux_Original, c=1)
-
-#gamma = gamma_transform(aux_Original, c=1, gamma=0.3)
-
-
-#print(aux_Original)
-#resaltar = intensity_slicing(aux_Original,150,230, highlight_value=255, preserve_outside=False)
-
- # Aplicar el slicing de los bit planes
-bit_planes_sliced = bit_plane_slicing(aux_Original)
-
-print(bit_planes_sliced)
-
-    # Mostrar cada bit plane
-for i, plane in enumerate(bit_planes_sliced):
-        cv2.imshow(f'Bit Plane {i}', plane)
-
-#negativo  = negative_transform(aux_Original)    
-
-#contraste_estirado = estiramiento_contraste(aux_Original)
-
-#cv2.imshow('original', original)
-
-#cv2.imshow('contraste_estirado', contraste_estirado)
-
-#cv2.imshow('resaltar', resaltar )    
-#cv2.imshow('modificada',cv2.hconcat([original, contraste_estirado]))
-#brillo_up = imadjust(original, gamma=0.3) # Aumentar brillo
-#brillo_down = imadjust(original, gamma=1.7) # Disminuir
-
-
-# Mostrar imágenes
-#_, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(10, 10))
-
-#ax0.imshow(original, cmap="gray")
-#ax0.set_title("original")
-#ax0.set_axis_off()
-
-#ax1.imshow(negativo, cmap="gray")
-#ax1.set_title("negativo")
-#ax1.set_axis_off()
-
-#ax2.imshow(brillo_up, cmap="gray")
-#ax2.set_title("brillo_up")
-#ax2.set_axis_off()
-
-#ax3.imshow(brillo_down, cmap="gray")
-#ax3.set_title("brillo_down")
-#ax3.set_axis_off()
-
-
+# Función para mostrar la imagen
+def display_image(image, title="Imagen",imagenOriginal=None):
+    cv2.imshow('RESULTADO',cv2.hconcat([imagenOriginal, image]))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 # Código principal para manipular imágenes
 if __name__ == "__main__":
-    # Cargar la imagen
-    image_path = 'tu_imagen_bn.jpg'  # Coloca el nombre de tu imagen en blanco y negro
-    image = load_image_grayscale(image_path)
-    
+    #Menu de opciones
 
+    #elegir imagen de entrada 
 
+    # Mostrar el menú de transformación
+    print("Elige un tipo de imagen:")
+    print("1. Alto Contraste")
+    print("2. Bajo Contraste")
+    print("3. Poca Iluminación")
+
+    # Leer la opción del usuario
+
+    opcion = int(input("Opción: "))
+
+    # Leer la imagen de entrada
+    if opcion == 1:
+        image = cv2.imread('alto_contraste2.jpg', cv2.IMREAD_GRAYSCALE)
+    elif opcion == 2:
+        image = cv2.imread('bajo_contraste2.png', cv2.IMREAD_GRAYSCALE)
+    elif opcion == 3:
+        image = cv2.imread('poca_iluminacion.jpg', cv2.IMREAD_GRAYSCALE)
+    else:
+        print("Opción no válida.")
+        image = None
+
+    # Verificar si se seleccionó una imagen válida
 
     if image is not None:
-        # Mostrar la imagen original
-        display_image(image, "Imagen Original")
-        
-        # Invertir los colores (negativo)
-        inverted_image = invert_image(image)
-        display_image(inverted_image, "Imagen Invertida (Negativo)")
-        
-        # Ajustar el contraste
-        contrast_image = adjust_contrast(image)
-        display_image(contrast_image, "Contraste Ajustado")
-        
-        # Aplicar bit-plane slicing
-        bit_planes = bit_plane_slicing(image)
-        for i, plane in enumerate(bit_planes):
-            display_image(plane, f"Plano de Bits {i}")
+        # Mostrar la imagen de entrada
+             # Mostrar el menú de transformación
+        print("Elige un tipo transformación:")
+        print("1. Negativo")
+        print("2. Logarítmica")
+        print("3. Gamma")
+        print("4. Estiramiento de contraste")
+        print("5. Slicing de intensidad")
+        print("6. Slicing de planos de bits")
+        print("7. Salir")
 
-        # Guardar una de las imágenes procesadas como ejemplo
-        save_image(inverted_image, "imagen_invertida.jpg")
+        # Leer la opción del usuario
+        opcion = int(input("Opción: "))
+        # Verificar la opción seleccionada
+
+        image = np.array(image)
+      
+        if opcion == 1:
+            # Transformación negativa
+            negativo = negative_transform(image)
+            display_image(negativo, "Negativo",image)
+        elif opcion == 2:
+            # Transformación logarítmica
+            loga = log_transform(image)
+            display_image(loga, "Logarítmica",image)
+        elif opcion == 3:
+            # Transformación gamma
+            gammaI = gamma_transform(image,1,2)
+            display_image(gammaI, "Gamma",image)
+        elif opcion == 4:
+            # Estiramiento de contraste
+            contraste_estirado = estiramiento_contraste(image)
+            display_image(contraste_estirado, "Estiramiento de contraste",image)
+        elif opcion == 5:
+            # Slicing de intensidad
+            r_min = int(input("Valor mínimo del rango de intensidad: "))
+            r_max = int(input("Valor máximo del rango de intensidad: "))
+            preserve_outside = bool(int(input("Preservar valores fuera del rango (1) o no (0): ")))
+            intensity_sliced = intensity_slicing(image, r_min, r_max,255, preserve_outside)
+            display_image(intensity_sliced, "Slicing de intensidad",image)
+        elif opcion == 6:
+            # Slicing de planos de bits
+            #mostrar imagen original
+            #cv2.imshow('Imagen Original',image)
+           
+            bit_planes_sliced = bit_plane_slicing(image)
+
+            # Definir el tamaño de la figura (en pulgadas)
+            plt.figure(figsize=(10, 5))  # Ajusta el tamaño según lo que necesites
+
+            # Mostrar la imagen original
+            plt.subplot(1, 4, 1)
+            plt.imshow(image, cmap='gray')
+            plt.title('Imagen Original')
+            plt.axis('off')
+
+            # Mostrar los planos de bits seleccionados (5, 6, 7)
+            for i in range(3):
+                plt.subplot(1, 4, i + 2)  # Las posiciones van de 2 a 4 en este caso
+                plt.imshow(bit_planes_sliced[i +5 ], cmap='gray')
+                plt.title(f'Bit Plane {5+i }')
+                plt.axis('off')
+
+                # Mostrar el resultado
+            plt.tight_layout()
+            plt.show()
+        else:
+            print("Opción no válida.")
     
-     cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    else:
+        print("Imagen no válida.")
+
+
+
 
 
 
